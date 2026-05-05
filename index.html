@@ -106,9 +106,14 @@
         padding: 10px;
       }
       .item button {
-        width: 44px;
+        width: auto;
+        min-width: 44px;
         min-height: 36px;
         background: #b94b5f;
+        padding: 0 10px;
+      }
+      .item .load {
+        background: #0f766e;
       }
       .result {
         margin-top: 10px;
@@ -130,7 +135,7 @@
   <body>
     <main>
       <h1>搜貨衣櫃</h1>
-      <div class="status" id="status">安全版 v4 已啟動。按「測試」會看到數字增加。</div>
+      <div class="status" id="status">安全版 v5 已啟動。按「測試」會看到數字增加。</div>
 
       <section>
         <h2>搜尋條件</h2>
@@ -176,7 +181,8 @@
       </section>
 
       <section>
-        <h2>監控清單</h2>
+        <h2>搜尋清單</h2>
+        <div class="result">把常搜的品牌和價格存起來。之後按「載入」就不用重打，再按上面的蝦皮、Yahoo、露天或 Google。</div>
         <div id="monitorList"></div>
       </section>
 
@@ -256,12 +262,24 @@
         function renderMonitors() {
           var list = byId("monitorList");
           if (!monitors.length) {
-            list.innerHTML = '<div class="result">還沒有監控，先按「加入監控」。</div>';
+            list.innerHTML = '<div class="result">還沒有搜尋條件，先按「加入監控」。</div>';
             return;
           }
           list.innerHTML = monitors.map(function (item, index) {
-            return '<div class="item"><div><strong>' + item.brand + '</strong><br><small>' + item.category + " / " + item.price + '元內</small></div><button data-index="' + index + '">X</button></div>';
+            return '<div class="item"><div><strong>' + item.brand + '</strong><br><small>' + item.category + " / " + item.price + '元內</small></div><div><button class="load" data-load="' + index + '">載入</button> <button data-delete="' + index + '">X</button></div></div>';
           }).join("");
+        }
+
+        function loadMonitor(index) {
+          var item = monitors[index];
+          if (!item) return;
+          byId("brand").value = item.brand;
+          byId("alias").value = item.alias;
+          byId("price").value = item.price;
+          byId("category").value = item.category;
+          updateLinks();
+          byId("status").textContent = "已載入：" + item.brand + "，現在可以按平台搜尋。";
+          window.scrollTo(0, 0);
         }
 
         function updateProfit() {
@@ -285,9 +303,13 @@
         };
 
         byId("monitorList").onclick = function (event) {
-          var index = event.target.getAttribute("data-index");
-          if (index !== null) {
-            monitors.splice(Number(index), 1);
+          var loadIndex = event.target.getAttribute("data-load");
+          var deleteIndex = event.target.getAttribute("data-delete");
+          if (loadIndex !== null) {
+            loadMonitor(Number(loadIndex));
+          }
+          if (deleteIndex !== null) {
+            monitors.splice(Number(deleteIndex), 1);
             renderMonitors();
           }
         };
