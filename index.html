@@ -135,7 +135,7 @@
   <body>
     <main>
       <h1>搜貨衣櫃</h1>
-      <div class="status" id="status">安全版 v5 已啟動。按「測試」會看到數字增加。</div>
+      <div class="status" id="status">v6 已啟動。最高價會當成篩選條件，不會塞進品牌關鍵字。</div>
 
       <section>
         <h2>搜尋條件</h2>
@@ -165,8 +165,8 @@
           </label>
         </div>
         <div class="button-row">
-          <button id="testButton" type="button">測試</button>
-          <button class="secondary" id="saveButton" type="button">加入監控</button>
+          <button id="updateButton" type="button">更新搜尋連結</button>
+          <button class="secondary" id="saveButton" type="button">加入搜尋清單</button>
         </div>
       </section>
 
@@ -224,7 +224,6 @@
           });
         }
 
-        var clickCount = 0;
         var monitors = [];
 
         function byId(id) {
@@ -246,11 +245,11 @@
 
         function updateLinks() {
           var data = getData();
-          var q = data.brand + " " + data.alias + " " + data.category + " " + data.price;
-          byId("shopee").href = "https://shopee.tw/search?keyword=" + enc(q);
-          byId("yahoo").href = "https://tw.bid.yahoo.com/search/auction/product?p=" + enc(q) + "&refine=con_used&sort=price";
+          var q = data.brand + " " + data.alias + " " + data.category;
+          byId("shopee").href = "https://shopee.tw/search?keyword=" + enc(q) + "&maxPrice=" + enc(data.price);
+          byId("yahoo").href = "https://tw.bid.yahoo.com/search/auction/product?p=" + enc(q) + "&refine=con_used&sort=price&minp=0&maxp=" + enc(data.price);
           byId("ruten").href = "https://www.ruten.com.tw/find/?q=" + enc(q);
-          byId("google").href = "https://www.google.com/search?q=" + enc(q + " 元以下");
+          byId("google").href = "https://www.google.com/search?q=" + enc(q + " " + data.price + "元以下");
           updateMessage();
         }
 
@@ -291,9 +290,9 @@
           byId("profit").textContent = "預估淨利：$" + profit;
         }
 
-        byId("testButton").onclick = function () {
-          clickCount += 1;
-          byId("status").textContent = "測試成功，程式有在運作。次數：" + clickCount;
+        byId("updateButton").onclick = function () {
+          updateLinks();
+          byId("status").textContent = "搜尋連結已更新。蝦皮和 Yahoo 會嘗試帶入最高價，露天進入後再手動篩價。";
         };
 
         byId("saveButton").onclick = function () {
