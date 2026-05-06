@@ -135,7 +135,7 @@
   <body>
     <main>
       <h1>搜貨衣櫃</h1>
-      <div class="status" id="status">v6 已啟動。最高價會當成篩選條件，不會塞進品牌關鍵字。</div>
+      <div class="status" id="status">v8 已啟動。品項可以自行輸入，也能從建議挑選。</div>
 
       <section>
         <h2>搜尋條件</h2>
@@ -154,14 +154,19 @@
           </label>
           <label>
             <span>品項</span>
-            <select id="category">
-              <option value="二手 衣服">二手衣服</option>
-              <option value="二手 上衣">上衣</option>
-              <option value="二手 洋裝">洋裝</option>
-              <option value="二手 外套">外套</option>
-              <option value="二手 裙子">裙子</option>
-              <option value="二手 包">包包</option>
-            </select>
+            <input id="category" list="categoryOptions" value="二手 衣服">
+            <datalist id="categoryOptions">
+              <option value="二手 衣服"></option>
+              <option value="二手 上衣"></option>
+              <option value="二手 洋裝"></option>
+              <option value="二手 外套"></option>
+              <option value="二手 裙子"></option>
+              <option value="二手 包"></option>
+              <option value="二手 針織"></option>
+              <option value="二手 連帽外套"></option>
+              <option value="二手 襯衫"></option>
+              <option value="二手 長褲"></option>
+            </datalist>
           </label>
         </div>
         <div class="button-row">
@@ -224,7 +229,24 @@
           });
         }
 
-        var monitors = [];
+        function loadSavedMonitors() {
+          try {
+            var saved = localStorage.getItem("secondhandSearchList");
+            return saved ? JSON.parse(saved) : [];
+          } catch (error) {
+            return [];
+          }
+        }
+
+        function saveMonitors() {
+          try {
+            localStorage.setItem("secondhandSearchList", JSON.stringify(monitors));
+          } catch (error) {
+            byId("status").textContent = "瀏覽器不允許存檔，搜尋清單只能暫時保留。";
+          }
+        }
+
+        var monitors = loadSavedMonitors();
 
         function byId(id) {
           return document.getElementById(id);
@@ -260,6 +282,7 @@
 
         function renderMonitors() {
           var list = byId("monitorList");
+          saveMonitors();
           if (!monitors.length) {
             list.innerHTML = '<div class="result">還沒有搜尋條件，先按「加入監控」。</div>';
             return;
@@ -298,7 +321,7 @@
         byId("saveButton").onclick = function () {
           monitors.unshift(getData());
           renderMonitors();
-          byId("status").textContent = "已加入監控：" + getData().brand;
+          byId("status").textContent = "已加入並存檔：" + getData().brand;
         };
 
         byId("monitorList").onclick = function (event) {
@@ -322,7 +345,7 @@
         byId("clearButton").onclick = function () {
           monitors = [];
           renderMonitors();
-          byId("status").textContent = "監控已清空。";
+          byId("status").textContent = "搜尋清單已清空。";
         };
 
         ["brand", "alias", "price", "category"].forEach(function (id) {
